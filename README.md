@@ -5,4 +5,4 @@ Y. Zhang, L.J. Paxton, An empirical Kp-dependent global auroral model based on T
 
 Please refer to Appendix A of this paper
 
-![alt text](http://url/to/img.png)
+![alt text]([http://url/to/img.png](https://github.com/FasilGibdaw/ZhangPaxtonAuroralModel/blob/main/example.png))

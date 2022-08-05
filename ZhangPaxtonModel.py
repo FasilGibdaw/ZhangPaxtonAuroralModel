@@ -22,7 +22,7 @@ file_dir2 = os.getcwd()+'/emean_coeff/'
 
 
 def main():
-    plot_kp(5, savefig=False)
+    plot_kp(5, savefig=True)
 
 
 def read_coeff(file):
@@ -161,7 +161,8 @@ def plot_kp(kp, savefig=False):
     ###
     fig = plt.figure(figsize=(12, 8))
     ax1 = fig.add_subplot(121, projection=ccrs.NorthPolarStereo())
-    cs1 = ax1.pcolor(ylon, xlat, emean, transform=ccrs.PlateCarree())
+    cs1 = ax1.pcolor(ylon, xlat, emean,
+                     transform=ccrs.PlateCarree(), cmap='jet')
     gl = ax1.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                        linewidth=1, color='white', alpha=0.3, linestyle='--')
     ax1.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())
@@ -172,7 +173,8 @@ def plot_kp(kp, savefig=False):
     ax1.set_title('Mean energy, '+'Kp='+str(kp))
 
     ax2 = fig.add_subplot(122, projection=ccrs.NorthPolarStereo())
-    cs2 = ax2.pcolor(ylon, xlat, eflux, transform=ccrs.PlateCarree())
+    cs2 = ax2.pcolor(ylon, xlat, eflux,
+                     transform=ccrs.PlateCarree(), cmap='jet')
     gl = ax2.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
                        linewidth=1, color='white', alpha=0.3, linestyle='--')
     ax2.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())

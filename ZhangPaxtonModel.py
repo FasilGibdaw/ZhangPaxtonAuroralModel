@@ -168,7 +168,7 @@ def plot_kp(kp, savefig=False):
     gl.right_labels = gl.left_labels = gl.top_labels = False
     ax1.axis('off')
     plt.tight_layout()
-    fig.colorbar(cs1, shrink=0.65)
+    fig.colorbar(cs1, shrink=0.65, label=r'Mean energy ($KeV$)')
     ax1.set_title('Mean energy, '+'Kp='+str(kp))
 
     ax2 = fig.add_subplot(122, projection=ccrs.NorthPolarStereo())
@@ -179,7 +179,7 @@ def plot_kp(kp, savefig=False):
     gl.right_labels = gl.left_labels = gl.top_labels = False
     ax2.axis('off')
     plt.tight_layout()
-    fig.colorbar(cs2, shrink=0.65)
+    fig.colorbar(cs2, shrink=0.65, label=r'Flux ($erg/s/cm^{2}$)')
     ax2.set_title('Energy flux, '+'Kp='+str(kp))
     if savefig == True:
         plt.savefig('ZhangPaxtonModel_KP'+str(kp)+'.png')

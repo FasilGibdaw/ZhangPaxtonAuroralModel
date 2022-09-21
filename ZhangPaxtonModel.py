@@ -2,6 +2,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+import matplotlib.ticker as mticker
+import matplotlib.path as mpath
 # This is a script for the kp-based auroral model provided in the paper
 # https://doi.org/10.1016/j.jastp.2008.03.008
 # This is not complete and not in standard, feel free to modify and use it
@@ -159,30 +161,85 @@ def plot_kp(kp, savefig=False):
     Lon = np.arange(0, 360, 7.5)
     xlat, ylon = np.meshgrid(Lat, Lon)
     ###
-    fig = plt.figure(figsize=(12, 8))
-    ax1 = fig.add_subplot(121, projection=ccrs.NorthPolarStereo())
+    fig = plt.figure(figsize=(12, 5))
+    ax1 = fig.add_subplot(1, 2, 1, projection=ccrs.NorthPolarStereo())
+    fig.subplots_adjust(bottom=0.05, top=0.95,
+                        left=0.04, right=0.95, wspace=0.02)
+    # Limit the map to -60 degrees latitude and below.
+    # ax1.set_extent([-180, 180, 90, 40], ccrs.PlateCarree())
+    # ax1.gridlines()
+
+    theta = np.linspace(0, 2*np.pi, 100)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    ax1.set_boundary(circle, transform=ax1.transAxes)
+
     cs1 = ax1.pcolor(ylon, xlat, emean,
                      transform=ccrs.PlateCarree(), cmap='jet')
-    gl = ax1.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                       linewidth=1, color='white', alpha=0.3, linestyle='--')
+
+    gl = ax1.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
+                       linewidth=1, color='black', alpha=0.3, linestyle='--')
     ax1.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())
-    gl.right_labels = gl.left_labels = gl.top_labels = False
-    ax1.axis('off')
-    plt.tight_layout()
-    fig.colorbar(cs1, shrink=0.65, label=r'Mean energy ($KeV$)')
-    ax1.set_title('Mean energy, '+'Kp='+str(kp))
+    yticks = list(np.arange(40, 90, 15))
+    xx = np.arange(-180, 180, 45)
+    gl.xlocator = mticker.FixedLocator(xx)
+    ax1.text(0.485, -0.04, '0', transform=ax1.transAxes)
+    ax1.text(0.86, 0.11, '3', rotation=45, transform=ax1.transAxes)
+    ax1.text(1.01, 0.485, '6', transform=ax1.transAxes)
+    ax1.text(0.86, 0.86, '9', rotation=45, transform=ax1.transAxes)
+    ax1.text(0.485, 1.02, '12', transform=ax1.transAxes)
+    ax1.text(0.1, 0.86, '15', rotation=45, transform=ax1.transAxes)
+    ax1.text(-0.05, 0.485, '18', transform=ax1.transAxes)
+    ax1.text(0.1, 0.1, '21', rotation=45, transform=ax1.transAxes)
+
+    ax1.text(0.5, 0.47, '90', transform=ax1.transAxes)
+    ax1.text(0.5, 0.4, '80', transform=ax1.transAxes)
+    ax1.text(0.5, 0.3, '70', transform=ax1.transAxes)
+    ax1.text(0.5, 0.2, '60', transform=ax1.transAxes)
+    ax1.text(0.5, 0.1, '50', transform=ax1.transAxes)
+    ax1.text(0.5, 0., '40', transform=ax1.transAxes)
+    # gl.xlocator = mticker.FixedLocator(xx)
+    # ax1.set_xlabel(['0','3','6','9','12','15','18','21'])
+    # gl.right_labels = gl.left_labels = gl.top_labels = True
+
+    # ax1.axis('off')
+    fig.colorbar(cs1, label=r'Mean energy ($KeV$)')
+    ax1.text(0.7, 1, 'Mean energy, '+'Kp='+str(kp), transform=ax1.transAxes)
 
     ax2 = fig.add_subplot(122, projection=ccrs.NorthPolarStereo())
+    theta = np.linspace(0, 2*np.pi, 100)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    ax2.set_boundary(circle, transform=ax2.transAxes)
     cs2 = ax2.pcolor(ylon, xlat, eflux,
                      transform=ccrs.PlateCarree(), cmap='jet')
-    gl = ax2.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                       linewidth=1, color='white', alpha=0.3, linestyle='--')
+    gl = ax2.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
+                       linewidth=1, color='black', alpha=0.3, linestyle='--')
     ax2.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())
-    gl.right_labels = gl.left_labels = gl.top_labels = False
-    ax2.axis('off')
-    plt.tight_layout()
-    fig.colorbar(cs2, shrink=0.65, label=r'Flux ($erg/s/cm^{2}$)')
-    ax2.set_title('Energy flux, '+'Kp='+str(kp))
+    #gl.right_labels = gl.left_labels = gl.top_labels = False
+    # ax2.axis('off')
+    # plt.tight_layout()
+    xx = np.arange(-180, 180, 45)
+    gl.xlocator = mticker.FixedLocator(xx)
+    ax2.text(0.485, -0.04, '0', transform=ax2.transAxes)
+    ax2.text(0.86, 0.11, '3', rotation=45, transform=ax2.transAxes)
+    ax2.text(1.01, 0.485, '6', transform=ax2.transAxes)
+    ax2.text(0.86, 0.86, '9', rotation=45, transform=ax2.transAxes)
+    ax2.text(0.485, 1.02, '12', transform=ax2.transAxes)
+    ax2.text(0.1, 0.86, '15', rotation=45, transform=ax2.transAxes)
+    ax2.text(-0.05, 0.485, '18', transform=ax2.transAxes)
+    ax2.text(0.1, 0.1, '21', rotation=45, transform=ax2.transAxes)
+
+    ax2.text(0.5, 0.47, '90', transform=ax2.transAxes)
+    ax2.text(0.5, 0.4, '80', transform=ax2.transAxes)
+    ax2.text(0.5, 0.3, '70', transform=ax2.transAxes)
+    ax2.text(0.5, 0.2, '60', transform=ax2.transAxes)
+    ax2.text(0.5, 0.1, '50', transform=ax2.transAxes)
+    ax2.text(0.5, 0., '40', transform=ax2.transAxes)
+    fig.colorbar(cs2, label=r'Flux ($erg/s/cm^{2}$)')
+    ax2.text(0.7, 1, 'Energy flux, '+'Kp='+str(kp), transform=ax2.transAxes)
     if savefig == True:
         plt.savefig('ZhangPaxtonModel_KP'+str(kp)+'.png')
     plt.show()

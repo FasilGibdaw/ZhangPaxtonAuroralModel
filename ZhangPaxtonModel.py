@@ -19,8 +19,8 @@ chi = 90-abs(Mlat)  # co-latitude
 kp_m = np.array([0.75, 2.25, 3.75, 5.25, 7, 9])  # kp_model refer the paper
 # avoid kp=7 and kp=9 to avoid NaNs in the model calculations
 
-file_dir = os.getcwd()+'/eflux_coeff/'
-file_dir2 = os.getcwd()+'/emean_coeff/'
+file_dir = './eflux_coeff/'
+file_dir2 = './emean_coeff/'
 
 
 def main():

@@ -2,6 +2,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+import warnings
+warnings.filterwarnings("ignore")
 # This is a script for the kp-based auroral model provided in the paper
 # https://doi.org/10.1016/j.jastp.2008.03.008
 # This is not complete and not in standard, feel free to modify and use it
@@ -115,41 +117,27 @@ def Eflux(kp):
     f2 = (kp-kpm1)/(kpm2-kpm1)
     flux = np.nan*np.zeros((len(MLT), len(Mlat)))
     #Emean = np.nan*np.zeros((len(MLT), len(Mlat)))
+    flux = []
     L, U = flux_coeff(kp)
-    for i in range(len(MLT)):
-        a = L[0][i]
-        b = L[1][i]
-        c = L[2][i]
-        d = L[3][i]
-        a2 = U[0][i]
-        b2 = U[1][i]
-        c2 = U[2][i]
-        d2 = L[3][i]
+    for a, b, c, d, a2, b2, c2, d2 in zip(L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]):
         Eom1 = (a*np.exp((chi-b)/c))/((1+np.exp((chi-b)/d))**2)
         Eom2 = (a2*np.exp((chi-b2)/c2))/((1+np.exp((chi-b2)/d2))**2)
-        flux[i:] = f1*Eom1+f2*Eom2
+        flux.append(f1*Eom1+f2*Eom2)
     #Eo = F1*Eom1+F2*Eom2
-    return flux
+    return np.array(flux)
 
 
 def Emean(kp):
     emean = np.nan*np.zeros((len(MLT), len(Mlat)))
+    emean = []
     L, U = mean_coeff(kp)
     F1, F2 = HemisphericPower(kp)
-    for i in range(len(MLT)):
-        a = L[0][i]
-        b = L[1][i]
-        c = L[2][i]
-        d = L[3][i]
-        a2 = U[0][i]
-        b2 = U[1][i]
-        c2 = U[2][i]
-        d2 = L[3][i]
+    for a, b, c, d, a2, b2, c2, d2 in zip(L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]):
         Eom1 = (a*np.exp((chi-b)/c))/((1+np.exp((chi-b)/d))**2)
         Eom2 = (a2*np.exp((chi-b2)/c2))/((1+np.exp((chi-b2)/d2))**2)
-        emean[i:] = F1*Eom1+F2*Eom2
+        emean.append(F1*Eom1+F2*Eom2)
     #Eo = F1*Eom1+F2*Eom2
-    return emean
+    return np.array(emean)
 
 
 def plot_kp(kp, savefig=False):

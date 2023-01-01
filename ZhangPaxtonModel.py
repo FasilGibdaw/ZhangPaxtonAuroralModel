@@ -1,14 +1,11 @@
+import matplotlib.path as mpath
+import matplotlib.ticker as mticker
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-<<<<<<< HEAD
 import warnings
 warnings.filterwarnings("ignore")
-=======
-import matplotlib.ticker as mticker
-import matplotlib.path as mpath
->>>>>>> 5cc7b3df160cac28e89b2b79172944ce572e728a
 # This is a script for the kp-based auroral model provided in the paper
 # https://doi.org/10.1016/j.jastp.2008.03.008
 # This is not complete and not in standard, feel free to modify and use it

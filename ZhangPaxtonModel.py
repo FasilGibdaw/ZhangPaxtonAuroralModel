@@ -48,43 +48,39 @@ def compute_coeff(file):
     return co
 
 
-def flux_coeff(kp):
-    if kp <= 1.5 or np.logical_and(kp > 1.5, kp <= 3):
-        constL = compute_coeff(file_dir+'K0.txt')
-        constU = compute_coeff(file_dir+'K1.txt')
-    elif np.logical_and(kp > 3, kp <= 4.5):
-        constL = compute_coeff(file_dir+'K1.txt')
-        constU = compute_coeff(file_dir+'K2.txt')
-    elif np.logical_and(kp > 4.5, kp <= 6):
-        constL = compute_coeff(file_dir+'K2.txt')
-        constU = compute_coeff(file_dir+'K3.txt')
-    elif np.logical_and(kp > 6, kp <= 8):
-        constL = compute_coeff(file_dir+'K3.txt')
-        constU = compute_coeff(file_dir+'K4.txt')
-    elif np.logical_and(kp > 8, kp <= 10):
-        constL = compute_coeff(file_dir+'K4.txt')
-        constU = compute_coeff(file_dir+'K5.txt')
-    return constL, constU
+# define the file paths in a dictionary
+file_paths = {
+    1.5: ('K0.txt', 'K1.txt'),
+    3: ('K0.txt', 'K1.txt'),
+    4.5: ('K1.txt', 'K2.txt'),
+    6: ('K2.txt', 'K3.txt'),
+    8: ('K3.txt', 'K4.txt'),
+    10: ('K4.txt', 'K5.txt')
+}
 
+def flux_coeff(kp):
+    constL, constU = None, None
+    
+    # retrieve the file paths based on the value of kp
+    for k, v in file_paths.items():
+        if kp <= k:
+            constL = compute_coeff(file_dir + v[0])
+            constU = compute_coeff(file_dir + v[1])
+            break
+            
+    return constL, constU
 
 def mean_coeff(kp):
-    if kp <= 1.5 or np.logical_and(kp > 1.5, kp <= 3):
-        constL = compute_coeff(file_dir2+'K0.txt')
-        constU = compute_coeff(file_dir2+'K1.txt')
-    elif np.logical_and(kp > 3, kp <= 4.5):
-        constL = compute_coeff(file_dir2+'K1.txt')
-        constU = compute_coeff(file_dir2+'K2.txt')
-    elif np.logical_and(kp > 4.5, kp <= 6):
-        constL = compute_coeff(file_dir2+'K2.txt')
-        constU = compute_coeff(file_dir2+'K3.txt')
-    elif np.logical_and(kp > 6, kp <= 8):
-        constL = compute_coeff(file_dir2+'K3.txt')
-        constU = compute_coeff(file_dir2+'K4.txt')
-    elif np.logical_and(kp > 8, kp <= 10):
-        constL = compute_coeff(file_dir2+'K4.txt')
-        constU = compute_coeff(file_dir2+'K5.txt')
+    constL, constU = None, None
+    
+    # retrieve the file paths based on the value of kp
+    for k, v in file_paths.items():
+        if kp <= k:
+            constL = compute_coeff(file_dir2 + v[0])
+            constU = compute_coeff(file_dir2 + v[1])
+            break
+            
     return constL, constU
-
 
 def kpm(kp):
     if kp < 0.75:

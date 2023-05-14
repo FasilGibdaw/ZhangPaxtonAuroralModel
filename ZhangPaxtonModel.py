@@ -10,8 +10,8 @@ warnings.filterwarnings("ignore")
 # -------- last updated on Januray 2022 by Fasil Tesema (fasil.kebede@helsinki.fi)
 #
 MLT = np.arange(0, 24, 0.5)  # magnetic local time
-Mlat = np.arange(40, 90.5, 0.5)
-ang = MLT*2*np.pi/24
+Mlat = np.arange(40, 90.5, 0.5) # magnetic latitude
+ang = MLT*2*np.pi/24 
 chi = 90-abs(Mlat)  # co-latitude
 kp_m = np.array([0.75, 2.25, 3.75, 5.25, 7, 9])  # kp_model refer the paper
 # avoid kp=7 and kp=9 to avoid NaNs in the model calculations

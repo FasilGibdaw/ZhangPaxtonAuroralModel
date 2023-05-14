@@ -1,17 +1,13 @@
 import matplotlib.path as mpath
 import matplotlib.ticker as mticker
 import numpy as np
-import os
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import warnings
 warnings.filterwarnings("ignore")
 # This is a script for the kp-based auroral model provided in the paper
 # https://doi.org/10.1016/j.jastp.2008.03.008
-# This is not complete and not in standard, feel free to modify and use it
 # -------- last updated on Januray 2022 by Fasil Tesema (fasil.kebede@helsinki.fi)
-# --------
-# --------
 #
 MLT = np.arange(0, 24, 0.5)  # magnetic local time
 # magnetic latitude: for Southern hemisphere -90:0.5:-30
@@ -94,7 +90,7 @@ def kpm(kp):
     return kpm1, kpm2
 
 
-def HemisphericPower(kp):
+def hemispheric_power(kp):
     kpm1, kpm2 = kpm(kp)
     if kp <= 5:
         HP = 38.66*np.exp(0.1967*kp)-33.99  # -33.99
@@ -129,7 +125,7 @@ def Emean(kp):
     emean = np.nan*np.zeros((len(MLT), len(Mlat)))
     emean = []
     L, U = mean_coeff(kp)
-    F1, F2 = HemisphericPower(kp)
+    F1, F2 = hemispheric_power(kp)
     for a, b, c, d, a2, b2, c2, d2 in zip(L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]):
         Eom1 = (a*np.exp((chi-b)/c))/((1+np.exp((chi-b)/d))**2)
         Eom2 = (a2*np.exp((chi-b2)/c2))/((1+np.exp((chi-b2)/d2))**2)
@@ -168,21 +164,16 @@ def plot_kp(kp, savefig=False):
     yticks = list(np.arange(40, 90, 15))
     xx = np.arange(-180, 180, 45)
     gl.xlocator = mticker.FixedLocator(xx)
-    ax1.text(0.485, -0.04, '0', transform=ax1.transAxes)
-    ax1.text(0.86, 0.11, '3', rotation=45, transform=ax1.transAxes)
-    ax1.text(1.01, 0.485, '6', transform=ax1.transAxes)
-    ax1.text(0.86, 0.86, '9', rotation=45, transform=ax1.transAxes)
-    ax1.text(0.485, 1.02, '12', transform=ax1.transAxes)
-    ax1.text(0.1, 0.86, '15', rotation=45, transform=ax1.transAxes)
-    ax1.text(-0.05, 0.485, '18', transform=ax1.transAxes)
-    ax1.text(0.1, 0.1, '21', rotation=45, transform=ax1.transAxes)
-
-    ax1.text(0.5, 0.47, '90', transform=ax1.transAxes)
-    ax1.text(0.5, 0.4, '80', transform=ax1.transAxes)
-    ax1.text(0.5, 0.3, '70', transform=ax1.transAxes)
-    ax1.text(0.5, 0.2, '60', transform=ax1.transAxes)
-    ax1.text(0.5, 0.1, '50', transform=ax1.transAxes)
-    ax1.text(0.5, 0., '40', transform=ax1.transAxes)
+    loc_x_mlt = [0.485,0.86,1.01,0.86,0.485,0.1,-0.05,0.1]
+    loc_y_mlt = [-0.04,0.11,0.485,0.86,1.02,0.86,0.485,0.1]
+    loc_x_lat = [0.5]*6
+    loc_y_lat = [0.47,0.4,0.3,0.2,0.1,0.]
+    mlt_label = [str(elem) for elem in np.arange(0,24,3)]
+    lat_label = [str(elem) for elem in np.arange(90,30,-10)]
+    for xmlt,ymlt,label_mlt in zip(loc_x_mlt,loc_y_mlt,mlt_label):
+        ax1.text(xmlt, ymlt, label_mlt, transform=ax1.transAxes)
+    for x_lat,ylat,label_lat in zip(loc_x_lat,loc_y_lat,lat_label):
+        ax1.text(x_lat, ylat, label_lat, transform=ax1.transAxes)
     # gl.xlocator = mticker.FixedLocator(xx)
     # ax1.set_xlabel(['0','3','6','9','12','15','18','21'])
     # gl.right_labels = gl.left_labels = gl.top_labels = True
@@ -207,21 +198,10 @@ def plot_kp(kp, savefig=False):
     # plt.tight_layout()
     xx = np.arange(-180, 180, 45)
     gl.xlocator = mticker.FixedLocator(xx)
-    ax2.text(0.485, -0.04, '0', transform=ax2.transAxes)
-    ax2.text(0.86, 0.11, '3', rotation=45, transform=ax2.transAxes)
-    ax2.text(1.01, 0.485, '6', transform=ax2.transAxes)
-    ax2.text(0.86, 0.86, '9', rotation=45, transform=ax2.transAxes)
-    ax2.text(0.485, 1.02, '12', transform=ax2.transAxes)
-    ax2.text(0.1, 0.86, '15', rotation=45, transform=ax2.transAxes)
-    ax2.text(-0.05, 0.485, '18', transform=ax2.transAxes)
-    ax2.text(0.1, 0.1, '21', rotation=45, transform=ax2.transAxes)
-
-    ax2.text(0.5, 0.47, '90', transform=ax2.transAxes)
-    ax2.text(0.5, 0.4, '80', transform=ax2.transAxes)
-    ax2.text(0.5, 0.3, '70', transform=ax2.transAxes)
-    ax2.text(0.5, 0.2, '60', transform=ax2.transAxes)
-    ax2.text(0.5, 0.1, '50', transform=ax2.transAxes)
-    ax2.text(0.5, 0., '40', transform=ax2.transAxes)
+    for xmlt,ymlt,label_mlt in zip(loc_x_mlt,loc_y_mlt,mlt_label):
+        ax2.text(xmlt, ymlt, label_mlt, transform=ax2.transAxes)
+    for x_lat,ylat,label_lat in zip(loc_x_lat,loc_y_lat,lat_label):
+        ax2.text(x_lat, ylat, label_lat, transform=ax2.transAxes)
     fig.colorbar(cs2, label=r'Flux ($erg/s/cm^{2}$)')
     ax2.text(0.7, 1, 'Energy flux, '+'Kp='+str(kp), transform=ax2.transAxes)
     if savefig == True:

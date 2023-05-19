@@ -108,7 +108,8 @@ def Eflux(kp):
     kpm1, kpm2 = kpm(kp)
     f1 = (kpm2-kp)/(kpm2-kpm1)
     f2 = (kp-kpm1)/(kpm2-kpm1)
-    flux = np.nan*np.zeros((len(MLT), len(Mlat)))
+    flux = np.full((len(MLT), len(Mlat)), np.nan)
+    #flux = np.nan*np.zeros((len(MLT), len(Mlat)))
     #Emean = np.nan*np.zeros((len(MLT), len(Mlat)))
     flux = []
     L, U = flux_coeff(kp)

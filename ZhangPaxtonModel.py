@@ -110,7 +110,6 @@ def Eflux(kp):
     f2 = (kp-kpm1)/(kpm2-kpm1)
     flux = np.full((len(MLT), len(Mlat)), np.nan)
     #flux = np.nan*np.zeros((len(MLT), len(Mlat)))
-    #Emean = np.nan*np.zeros((len(MLT), len(Mlat)))
     flux = []
     L, U = flux_coeff(kp)
     for a, b, c, d, a2, b2, c2, d2 in zip(L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]):

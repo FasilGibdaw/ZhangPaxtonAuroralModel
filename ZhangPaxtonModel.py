@@ -204,7 +204,7 @@ def plot_kp(kp, savefig=False):
     fig.colorbar(cs2, label=r'Flux ($erg/s/cm^{2}$)')
     ax2.text(0.7, 1, 'Energy flux, '+'Kp='+str(kp), transform=ax2.transAxes)
     if savefig == True:
-        plt.savefig('ZhangPaxtonModel_KP'+str(kp)+'.png')
+        plt.savefig('ZhangPaxtonModel_KP'+str(kp)+'.png', dpi=800)
     plt.show()
 
 

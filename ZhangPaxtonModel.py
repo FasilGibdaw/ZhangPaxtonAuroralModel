@@ -1,5 +1,6 @@
 import matplotlib.path as mpath
 import matplotlib.ticker as mticker
+import matplotlib.colors as mcolors
 import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -9,8 +10,8 @@ warnings.filterwarnings("ignore")
 # https://doi.org/10.1016/j.jastp.2008.03.008
 # -------- last updated on Januray 2023 by Fasil Tesema (fasil.kebede@helsinki.fi)
 #
-MLT = np.arange(0, 24, 0.5)  # magnetic local time
-Mlat = np.arange(40, 90.5, 0.5)  # magnetic latitude
+MLT = np.arange(0, 24, 0.01)  # magnetic local time
+Mlat = np.arange(40, 90.5, 0.15)  # magnetic latitude
 ang = MLT*2*np.pi/24
 chi = 90-abs(Mlat)  # co-latitude
 kp_m = np.array([0.75, 2.25, 3.75, 5.25, 7, 9])  # kp_model refer the paper
@@ -20,7 +21,7 @@ file_dir2 = './emean_coeff/'
 
 
 def main():
-    plot_kp(3, savefig=True)
+    plot_kp(3, savefig=True,cmap_upper=6)
 
 
 def read_coeff(file):
@@ -124,7 +125,7 @@ def Eflux(kp):
 
 
 def Emean(kp):
-    emean = np.nan*np.zeros((len(MLT), len(Mlat)))
+    #emean = np.nan*np.zeros((len(MLT), len(Mlat)))
     emean = []
     L, U = mean_coeff(kp)
     F1, F2 = hemispheric_power(kp)
@@ -146,21 +147,23 @@ def find_boundary_indices(array, value):
             top_ind = cont[0]
             bottom_ind = cont[-1]
         else:
-            top_ind = np.nan
-            bottom_ind = np.nan
+            top_ind = bottom_ind
         top_indices.append(top_ind)
         bottom_indices.append(bottom_ind)
     return top_indices, bottom_indices
 
 
-def plot_kp(kp, savefig=False):
+def plot_kp(kp, savefig=False,cmap_upper=6):
     emean = Emean(kp)
     eflux = Eflux(kp)
-    cmap_upper=4
     top_indices, bottom_indices = find_boundary_indices(eflux.T, 0.25)
-    Lat = np.arange(40, 90.5, 0.5)  # for Southern hemisphere -90:0.5:-30
-    Lon = np.arange(0, 360, 7.5)
+    Lat = np.arange(40, 90.5, 0.15)  # for Southern hemisphere -90:0.5:-30
+    Lon = np.arange(0, 360, 0.15)
     xlat, ylon = np.meshgrid(Lat, Lon)
+    ###
+    colors = ['#000000', '#031b03', '#08420b', '#1a5419', '#377f33', '#6bb25a', '#a3d683', '#d4f1a5', '#f5ffd5']# Example colors
+    colors.reverse()
+    green_aurora_cmap = mcolors.LinearSegmentedColormap.from_list('GreenAurora', colors)
     ###
     fig = plt.figure(figsize=(12, 5))
     ax1 = fig.add_subplot(1, 2, 1, projection=ccrs.NorthPolarStereo())
@@ -177,7 +180,7 @@ def plot_kp(kp, savefig=False):
     ax1.set_boundary(circle, transform=ax1.transAxes)
 
     cs1 = ax1.pcolormesh(ylon, xlat, emean,
-                     transform=ccrs.PlateCarree(), cmap='jet',vmin=0,vmax=cmap_upper)
+                     transform=ccrs.PlateCarree(), cmap=green_aurora_cmap,vmin=0,vmax=cmap_upper)
 
     gl = ax1.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
                        linewidth=1, color='black', alpha=0.3, linestyle='--')
@@ -202,8 +205,8 @@ def plot_kp(kp, savefig=False):
     # ax1.axis('off')
     fig.colorbar(cs1, label=r'Mean energy ($KeV$)')
     ax1.text(0.7, 1, 'Mean energy, '+'Kp='+str(kp), transform=ax1.transAxes)
-    ax1.plot(Lon, Lat[bottom_indices], '.k', transform=ccrs.PlateCarree())
-    ax1.plot(Lon, Lat[top_indices], '.g', transform=ccrs.PlateCarree())
+    ax1.plot(Lon, Lat[bottom_indices], 'k', transform=ccrs.PlateCarree())
+    ax1.plot(Lon, Lat[top_indices], '--r', transform=ccrs.PlateCarree())
     ax2 = fig.add_subplot(122, projection=ccrs.NorthPolarStereo())
     theta = np.linspace(0, 2*np.pi, 100)
     center, radius = [0.5, 0.5], 0.5
@@ -211,7 +214,7 @@ def plot_kp(kp, savefig=False):
     circle = mpath.Path(verts * radius + center)
     ax2.set_boundary(circle, transform=ax2.transAxes)
     cs2 = ax2.pcolormesh(ylon, xlat, eflux,
-                     transform=ccrs.PlateCarree(), cmap='jet',vmin=0,vmax=cmap_upper)
+                     transform=ccrs.PlateCarree(), cmap=green_aurora_cmap,vmin=0,vmax=cmap_upper-2)
     gl = ax2.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
                        linewidth=1, color='black', alpha=0.3, linestyle='--')
     ax2.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())
@@ -226,8 +229,8 @@ def plot_kp(kp, savefig=False):
         ax2.text(x_lat, ylat, label_lat, transform=ax2.transAxes)
     fig.colorbar(cs2, label=r'Flux ($erg/s/cm^{2}$)')
     ax2.text(0.7, 1, 'Energy flux, '+'Kp='+str(kp), transform=ax2.transAxes)
-    ax2.plot(Lon, Lat[bottom_indices], '.k', transform=ccrs.PlateCarree())
-    ax2.plot(Lon, Lat[top_indices], '.g', transform=ccrs.PlateCarree())
+    ax2.plot(Lon, Lat[bottom_indices], 'k', transform=ccrs.PlateCarree())
+    ax2.plot(Lon, Lat[top_indices], '--r', transform=ccrs.PlateCarree())
     if savefig == True:
         plt.savefig('ZhangPaxtonModel_KP'+str(kp)+'.png', dpi=800)
     plt.show()

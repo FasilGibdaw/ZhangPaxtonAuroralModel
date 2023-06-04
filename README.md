@@ -5,5 +5,5 @@ Y. Zhang, L.J. Paxton, An empirical Kp-dependent global auroral model based on T
 
 Please refer to Appendix A of the paper:
 
-Here is an example plot for kp=3: the black and green dots are the poleward and equatorward boundaries at flux above 0.25 $erg/s/cm^{2}$, respectively.
+Here is an example plot for kp=3: the black and red-dashed curves are the poleward and equatorward boundaries at flux above 0.25 $erg/s/cm^{2}$, respectively.
 ![alt text](https://github.com/FasilGibdaw/ZhangPaxtonAuroralModel/blob/main/ZhangPaxtonModel_KP3.png)

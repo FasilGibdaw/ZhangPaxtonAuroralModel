@@ -7,14 +7,13 @@ import warnings
 warnings.filterwarnings("ignore")
 # This is a script for the kp-based auroral model provided in the paper
 # https://doi.org/10.1016/j.jastp.2008.03.008
-# -------- last updated on Januray 2022 by Fasil Tesema (fasil.kebede@helsinki.fi)
+# -------- last updated on Januray 2023 by Fasil Tesema (fasil.kebede@helsinki.fi)
 #
 MLT = np.arange(0, 24, 0.5)  # magnetic local time
 Mlat = np.arange(40, 90.5, 0.5)  # magnetic latitude
 ang = MLT*2*np.pi/24
 chi = 90-abs(Mlat)  # co-latitude
 kp_m = np.array([0.75, 2.25, 3.75, 5.25, 7, 9])  # kp_model refer the paper
-# avoid kp=7 and kp=9 to avoid NaNs in the model calculations
 
 file_dir = './eflux_coeff/'
 file_dir2 = './emean_coeff/'
@@ -34,11 +33,12 @@ def read_coeff(file):
 
 def compute_coeff(file):
     const, ind_cos, ind_sin = read_coeff(file)
-    co = np.zeros((4, 48))
+    co = np.zeros((4, len(MLT)))
     for i in range(4):
         CONST = const[i]
         for ij in range(6):
-            CONST = CONST+ind_cos[ij, i]*np.cos(ang)+ind_sin[ij, i]*np.sin(ang)
+            k = ij +1
+            CONST = CONST+ind_cos[ij, i]*np.cos(k*ang)+ind_sin[ij, i]*np.sin(k*ang)
         co[i, :] = CONST
     return co
 
@@ -86,7 +86,7 @@ def kpm(kp):
         kpm2 = 2.25
     else:
         im1 = np.where(kp_m <= kp)
-        im2 = np.where(kp_m >= kp)
+        im2 = np.where(kp_m > kp)
         kpm1 = kp_m[im1[0][-1]]
         kpm2 = kp_m[im2[0][0]]
     return kpm1, kpm2
@@ -141,7 +141,7 @@ def find_boundary_indices(array, value):
     bottom_indices = []
     _, c = array.shape
     for i in range(c):
-        cont = np.where(array[:, i] > value)[0]
+        cont = np.where(array[:, i] >= value)[0]
         if cont.size > 0:
             top_ind = cont[0]
             bottom_ind = cont[-1]
@@ -156,6 +156,7 @@ def find_boundary_indices(array, value):
 def plot_kp(kp, savefig=False):
     emean = Emean(kp)
     eflux = Eflux(kp)
+    cmap_upper=4
     top_indices, bottom_indices = find_boundary_indices(eflux.T, 0.25)
     Lat = np.arange(40, 90.5, 0.5)  # for Southern hemisphere -90:0.5:-30
     Lon = np.arange(0, 360, 7.5)
@@ -175,8 +176,8 @@ def plot_kp(kp, savefig=False):
     circle = mpath.Path(verts * radius + center)
     ax1.set_boundary(circle, transform=ax1.transAxes)
 
-    cs1 = ax1.pcolor(ylon, xlat, emean,
-                     transform=ccrs.PlateCarree(), cmap='jet')
+    cs1 = ax1.pcolormesh(ylon, xlat, emean,
+                     transform=ccrs.PlateCarree(), cmap='jet',vmin=0,vmax=cmap_upper)
 
     gl = ax1.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
                        linewidth=1, color='black', alpha=0.3, linestyle='--')
@@ -209,8 +210,8 @@ def plot_kp(kp, savefig=False):
     verts = np.vstack([np.sin(theta), np.cos(theta)]).T
     circle = mpath.Path(verts * radius + center)
     ax2.set_boundary(circle, transform=ax2.transAxes)
-    cs2 = ax2.pcolor(ylon, xlat, eflux,
-                     transform=ccrs.PlateCarree(), cmap='jet')
+    cs2 = ax2.pcolormesh(ylon, xlat, eflux,
+                     transform=ccrs.PlateCarree(), cmap='jet',vmin=0,vmax=cmap_upper)
     gl = ax2.gridlines(crs=ccrs.PlateCarree(), draw_labels=False,
                        linewidth=1, color='black', alpha=0.3, linestyle='--')
     ax2.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())

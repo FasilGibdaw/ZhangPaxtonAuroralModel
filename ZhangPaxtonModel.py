@@ -28,6 +28,18 @@ class AuroraModel:
         }
 
     def read_coeff(self, file):
+        """
+        Read the coefficients from a given file.
+
+        Args:
+            file (str): Path to the file containing the coefficients.
+
+        Returns:
+            tuple: A tuple containing constant, cosine, and sine coefficients.
+
+        The coefficients are organized in the file with constant values in the first row,
+        cosine coefficients in the next 6 rows, and sine coefficients in the remaining rows.
+        """
         coeff = np.loadtxt(file, usecols=(1, 2, 3, 4))
         const = coeff[0]
         ind_cos = coeff[1:7]
@@ -35,8 +47,22 @@ class AuroraModel:
         return const, ind_cos, ind_sin
 
     def compute_coeff(self, file):
+        """
+        Compute the Epstein fitting coefficients from a given file.
+
+        Args:
+            file (str): The path to the file containing coefficients.
+
+        Returns:
+            numpy.ndarray: A 2D array of coefficients for different MLTs.
+
+        This method reads the coefficients from a file and computes the coefficients for different MLTs.
+        It first reads the constant, cosine, and sine coefficients using the read_coeff method.
+        Then, it iterates through different MLTs and computes the coefficients for each MLT.
+        The computed coefficients are stored in a 2D array and returned.
+        """
         const, ind_cos, ind_sin = self.read_coeff(file)
-        co = np.zeros((4, len(self.MLT)))
+        coefficients = np.zeros((4, len(self.MLT)))
         for i in range(4):
             CONST = const[i]
             for ij in range(6):
@@ -46,10 +72,24 @@ class AuroraModel:
                     + ind_cos[ij, i] * np.cos(k * self.ang)
                     + ind_sin[ij, i] * np.sin(k * self.ang)
                 )
-            co[i, :] = CONST
-        return co
+            coefficients[i, :] = CONST
+        return coefficients
 
     def flux_coeff(self, kp):
+        """
+        Calculate the flux coefficients for a given Kp index.
+
+        Args:
+            kp (float): The Kp index.
+
+        Returns:
+            tuple: A tuple containing two 2D arrays of lower and upper flux coefficients.
+
+        This method calculates the flux coefficients for a given Kp index by determining
+        the appropriate file paths based on the Kp value and then computing the coefficients
+        using the compute_coeff method for the lower and upper ranges.
+        The calculated coefficients are returned as a tuple containing two 2D arrays.
+        """
         constL, constU = None, None
 
         # retrieve the file paths based on the value of kp
@@ -62,6 +102,17 @@ class AuroraModel:
         return constL, constU
 
     def mean_coeff(self, kp):
+        """
+        Calculate the mean coefficients for a given Kp index by determining
+        the appropriate file paths based on the Kp value and then computing the coefficients
+        using the compute_coeff method for the lower and upper ranges.
+
+        Args:
+            kp (float): The Kp index.
+
+        Returns:
+            tuple: A tuple containing two 2D arrays of lower and upper mean coefficients.
+        """
         constL, constU = None, None
 
         # retrieve the file paths based on the value of kp
@@ -74,6 +125,16 @@ class AuroraModel:
         return constL, constU
 
     def kpm(self, kp):
+        """
+        Find the two adjacent Kp_model values (Kpm1 and Kpm2) that satisfy the two conditions.
+        See Appendix A on the paper.
+
+        Args:
+            kp (float): The Kp index.
+
+        Returns:
+            tuple: A tuple containing two Kp values for interpolation.
+        """
         if kp < 0.75:
             kpm1 = 0.75
             kpm2 = 2.25
@@ -85,6 +146,19 @@ class AuroraModel:
         return kpm1, kpm2
 
     def hemispheric_power(self, kp):
+        """
+        Calculate the hemispheric power factors F1 and F2 for a given Kp index used to combine energy components in the Emean method.
+        It calculates the hemispheric power for the given Kp index and adjacent Kp values (kpm1 and kpm2).
+        Depending on the value of Kp, different equations are used to calculate hemispheric power.
+
+        Args:
+            kp (float): The Kp index for which to calculate the hemispheric power factors.
+
+        Returns:
+            tuple: A tuple containing the F1 and F2 hemispheric power factors.
+
+        The calculated F1 and F2 factors are returned as a tuple.
+        """
         kpm1, kpm2 = self.kpm(kp)
         if kp <= 5:
             HP = 38.66 * np.exp(0.1967 * kp) - 33.99  # -33.99
@@ -99,16 +173,32 @@ class AuroraModel:
         return F1, F2
 
     def Eflux(self, kp):
+        """
+        Do nonlinear interpolation for the energy flux and for a given Kp index.
+
+        Args:
+            kp (float): The Kp index for which to calculate the energy flux.
+
+        Returns:
+            np.ndarray: The energy flux for the given Kp index.
+
+        This method calculates the energy flux using flux_coeff() and hemispheric_power() methods.
+        It computes the energy values at each latitude using coefficients and Kp-dependent factors.
+        The energy flux values are then combined based on F1 and F2 factors derived from hemispheric_power().
+        The resulting energy flux is returned as a NumPy array.
+        """
         kpm1, kpm2 = self.kpm(kp)
         f1 = (kpm2 - kp) / (kpm2 - kpm1)
         f2 = (kp - kpm1) / (kpm2 - kpm1)
         flux = np.full((len(self.MLT), len(self.Mlat)), np.nan)
-        # flux = np.nan*np.zeros((len(MLT), len(Mlat)))
         flux = []
+        # Obtain lower and upper coefficients using flux_coeff() method
         L, U = self.flux_coeff(kp)
+        # Iterate through coefficients and compute energy mean values
         for a, b, c, d, a2, b2, c2, d2 in zip(
             L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]
         ):
+            # Calculate energy values for both components
             Eom1 = (a * np.exp((self.chi - b) / c)) / (
                 (1 + np.exp((self.chi - b) / d)) ** 2
             )
@@ -116,13 +206,24 @@ class AuroraModel:
                 (1 + np.exp((self.chi - b2) / d2)) ** 2
             )
             flux.append(f1 * Eom1 + f2 * Eom2)
-        # Eo = F1*Eom1+F2*Eom2
         return np.array(flux)
 
     def Emean(self, kp):
-        # emean = np.nan*np.zeros((len(MLT), len(Mlat)))
+        """
+        nonlinear interpolation for the energy flux and for a given Kp index using mean_coeff() and hemispheric_power() methods.
+        It computes the energy values at each latitude using coefficients and Kp-dependent factors.
+        The energy mean values are then combined based on F1 and F2 factors derived from hemispheric_power().
+
+        Args:
+            kp (float): The Kp index for which to calculate the mean energy.
+
+        Returns:
+            np.ndarray: The mean energy for the given Kp index.
+        """
         emean = []
+        # Obtain lower and upper coefficients using mean_coeff() method
         L, U = self.mean_coeff(kp)
+        # Calculate F1 and F2 factors using hemispheric_power() method
         F1, F2 = self.hemispheric_power(kp)
         for a, b, c, d, a2, b2, c2, d2 in zip(
             L[0], L[1], L[2], L[3], U[0], U[1], U[2], U[3]
@@ -138,6 +239,19 @@ class AuroraModel:
         return np.array(emean)
 
     def find_boundary_indices(self, array, value):
+        """
+        Find the indices of the top and bottom boundaries in a 2D array based on a threshold value.
+        It scans each column of the 2D array to find where the values first exceed
+        or equal the specified threshold (top boundary) and where they last exceed or equal
+        the threshold (bottom boundary).
+
+        Args:
+            array (numpy.ndarray): The 2D array for which to find boundary indices.
+            value (float): The threshold value for determining the boundaries.
+
+        Returns:
+            tuple: A tuple containing lists of top and bottom indices for each column.
+        """
         top_indices = []
         bottom_indices = []
         _, c = array.shape
@@ -153,6 +267,23 @@ class AuroraModel:
         return top_indices, bottom_indices
 
     def plot_kp(self, kp, savefig=False, cmap_upper=6):
+        """
+        Plot the energy mean and energy flux maps for a given Kp index. This method generates 
+        and displays two subplots: one for the energy mean map and
+        one for the energy flux map. The maps are plotted using a North Polar Stereographic
+        projection. The auroral boundaries on the maps are indicated using lines based on top and
+        bottom boundary indices.
+
+        Args:
+            kp (float): The Kp index for which to generate the plots.
+            savefig (bool, optional): Whether to save the generated plots as an image. Default is False.
+            cmap_upper (int, optional): Upper limit for colormap scaling. Default is 6.
+
+        Returns:
+            display and or save figure
+            If 'savefig' is True, the plots are saved as image files.
+            Else displays figure 
+        """
         emean = self.Emean(kp)
         eflux = self.Eflux(kp)
         top_indices, bottom_indices = self.find_boundary_indices(eflux.T, 0.25)
@@ -179,9 +310,6 @@ class AuroraModel:
         fig = plt.figure(figsize=(12, 5))
         ax1 = fig.add_subplot(1, 2, 1, projection=ccrs.NorthPolarStereo())
         fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
-        # Limit the map to -60 degrees latitude and below.
-        # ax1.set_extent([-180, 180, 90, 40], ccrs.PlateCarree())
-        # ax1.gridlines()
 
         theta = np.linspace(0, 2 * np.pi, 100)
         center, radius = [0.5, 0.5], 0.5
@@ -221,11 +349,6 @@ class AuroraModel:
             ax1.text(xmlt, ymlt, label_mlt, transform=ax1.transAxes)
         for x_lat, ylat, label_lat in zip(loc_x_lat, loc_y_lat, lat_label):
             ax1.text(x_lat, ylat, label_lat, transform=ax1.transAxes)
-        # gl.xlocator = mticker.FixedLocator(xx)
-        # ax1.set_xlabel(['0','3','6','9','12','15','18','21'])
-        # gl.right_labels = gl.left_labels = gl.top_labels = True
-
-        # ax1.axis('off')
         fig.colorbar(cs1, label=r"Mean energy ($KeV$)")
         ax1.text(0.7, 1, "Mean energy, " + "Kp=" + str(kp), transform=ax1.transAxes)
         ax1.plot(Lon, Lat[bottom_indices], "k", transform=ccrs.PlateCarree())
@@ -254,9 +377,6 @@ class AuroraModel:
             linestyle="--",
         )
         ax2.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree())
-        # gl.right_labels = gl.left_labels = gl.top_labels = False
-        # ax2.axis('off')
-        # plt.tight_layout()
         xx = np.arange(-180, 180, 45)
         gl.xlocator = mticker.FixedLocator(xx)
         for xmlt, ymlt, label_mlt in zip(loc_x_mlt, loc_y_mlt, mlt_label):
@@ -274,4 +394,4 @@ class AuroraModel:
 
 if __name__ == "__main__":
     aurora_model = AuroraModel()
-    aurora_model.plot_kp(4, savefig=True, cmap_upper=6)
+    aurora_model.plot_kp(3, savefig=True, cmap_upper=6)

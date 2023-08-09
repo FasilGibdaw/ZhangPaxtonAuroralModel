@@ -8,6 +8,30 @@ import warnings
 
 
 class AuroraModel:
+    """
+    The AuroraModel class provides methods for visualizing aurora-related data based on the Zhang-Paxton auroral model.
+    See the paper: https://doi.org/10.1016/j.jastp.2008.03.008.
+    Class Attributes:
+    -----------------
+    MLT (numpy.ndarray): 
+        An array representing Magnetic Local Time (MLT) values from 0 to 24 in steps of 0.01.
+    Mlat (numpy.ndarray): 
+        An array representing Magnetic Latitude (Mlat) values from 40 to 90.5 in steps of 0.15.
+    ang (numpy.ndarray): 
+        Array of angles in radians derived from MLT for calculations.
+    chi (numpy.ndarray):
+        Array of chi angles (90 - |Mlat|) for calculations.
+    kp_m (numpy.ndarray):
+        An array representing Kp magnetic activity index values.
+    file_dir (str):
+        Directory path for flux coefficient data files.
+    file_dir2 (str):
+        Directory path for mean coefficient data files.
+    green_aurora_cmap (matplotlib.colors.LinearSegmentedColormap or None): 
+        Colormap for visualizations.
+    file_paths (dict): 
+        Dictionary mapping Kp values to associated file paths.
+    """
     def __init__(self):
         warnings.filterwarnings("ignore")
         self.MLT = np.arange(0, 24, 0.01)

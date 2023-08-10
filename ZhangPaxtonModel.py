@@ -32,6 +32,7 @@ class AuroraModel:
     file_paths (dict): 
         Dictionary mapping Kp values to associated file paths.
     """
+
     def __init__(self):
         warnings.filterwarnings("ignore")
         self.MLT = np.arange(0, 24, 0.01)
@@ -101,18 +102,15 @@ class AuroraModel:
 
     def flux_coeff(self, kp):
         """
-        Calculate the flux coefficients for a given Kp index.
+        Calculate the flux coefficients for a given Kp index by determining
+        the appropriate file paths based on the Kp value and then computing the coefficients
+        using the compute_coeff method for the lower and upper ranges.
 
         Args:
             kp (float): The Kp index.
 
         Returns:
             tuple: A tuple containing two 2D arrays of lower and upper flux coefficients.
-
-        This method calculates the flux coefficients for a given Kp index by determining
-        the appropriate file paths based on the Kp value and then computing the coefficients
-        using the compute_coeff method for the lower and upper ranges.
-        The calculated coefficients are returned as a tuple containing two 2D arrays.
         """
         constL, constU = None, None
 
@@ -333,7 +331,8 @@ class AuroraModel:
         ###
         fig = plt.figure(figsize=(12, 5))
         ax1 = fig.add_subplot(1, 2, 1, projection=ccrs.NorthPolarStereo())
-        fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
+        fig.subplots_adjust(bottom=0.05, top=0.95,
+                            left=0.04, right=0.95, wspace=0.02)
 
         theta = np.linspace(0, 2 * np.pi, 100)
         center, radius = [0.5, 0.5], 0.5
@@ -374,7 +373,8 @@ class AuroraModel:
         for x_lat, ylat, label_lat in zip(loc_x_lat, loc_y_lat, lat_label):
             ax1.text(x_lat, ylat, label_lat, transform=ax1.transAxes)
         fig.colorbar(cs1, label=r"Mean energy ($KeV$)")
-        ax1.text(0.7, 1, "Mean energy, " + "Kp=" + str(kp), transform=ax1.transAxes)
+        ax1.text(0.7, 1, "Mean energy, " + "Kp=" +
+                 str(kp), transform=ax1.transAxes)
         ax1.plot(Lon, Lat[bottom_indices], "k", transform=ccrs.PlateCarree())
         ax1.plot(Lon, Lat[top_indices], "--r", transform=ccrs.PlateCarree())
         ax2 = fig.add_subplot(122, projection=ccrs.NorthPolarStereo())
@@ -408,7 +408,8 @@ class AuroraModel:
         for x_lat, ylat, label_lat in zip(loc_x_lat, loc_y_lat, lat_label):
             ax2.text(x_lat, ylat, label_lat, transform=ax2.transAxes)
         fig.colorbar(cs2, label=r"Flux ($erg/s/cm^{2}$)")
-        ax2.text(0.7, 1, "Energy flux, " + "Kp=" + str(kp), transform=ax2.transAxes)
+        ax2.text(0.7, 1, "Energy flux, " + "Kp=" +
+                 str(kp), transform=ax2.transAxes)
         ax2.plot(Lon, Lat[bottom_indices], "k", transform=ccrs.PlateCarree())
         ax2.plot(Lon, Lat[top_indices], "--r", transform=ccrs.PlateCarree())
         if savefig == True:

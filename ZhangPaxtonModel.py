@@ -91,7 +91,7 @@ class AuroraModel:
         for i in range(4):
             CONST = const[i]
             for ij in range(6):
-                k = ij + 1
+                k = ij + 1 # this takes care of the (cos 1, cos 2 , cos 3 ... or sin 1, sin 2 and sin 3... (and multiply the angle))
                 CONST = (
                     CONST
                     + ind_cos[ij, i] * np.cos(k * self.ang)

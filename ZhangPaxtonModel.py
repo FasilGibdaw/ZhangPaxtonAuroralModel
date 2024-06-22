@@ -287,6 +287,13 @@ class AuroraModel:
             top_indices.append(top_ind)
             bottom_indices.append(bottom_ind)
         return top_indices, bottom_indices
+    
+    def calculate_conductance(self, kp):
+        # calculates the conductance (pedersen and hall) for a given Kp index using Robinson 1987 paper 
+        # https://agupubs.onlinelibrary.wiley.com/doi/10.1029/JA092iA03p02565
+        pedersen_conductance = ((40* self.Emean(kp))/(16+ self.Emean(kp)**2))*(self.Eflux(kp)**(1/2))
+        hall_conductance = (0.45* (self.Emean(kp)**0.85))*pedersen_conductance
+        return pedersen_conductance, hall_conductance
 
     def plot_kp(self, kp, savefig=False, cmap_upper=6):
         """

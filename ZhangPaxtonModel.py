@@ -7,7 +7,7 @@ import cartopy.crs as ccrs
 import warnings
 
 
-class AuroraModel:
+class AuroraModel():
     """
     The AuroraModel class provides methods for visualizing aurora-related data based on the Zhang-Paxton auroral model.
     See the paper: https://doi.org/10.1016/j.jastp.2008.03.008.
@@ -33,10 +33,10 @@ class AuroraModel:
         Dictionary mapping Kp values to associated file paths.
     """
 
-    def __init__(self):
+    def __init__(self, mlat, mlt):
         warnings.filterwarnings("ignore")
-        self.MLT = np.arange(0, 24, 0.01)
-        self.Mlat = np.arange(40, 90.5, 0.15)
+        self.MLT = mlt
+        self.Mlat = mlat
         self.ang = self.MLT * 2 * np.pi / 24
         self.chi = 90 - np.abs(self.Mlat)
         self.kp_m = np.array([0.75, 2.25, 3.75, 5.25, 7, 9])
@@ -91,7 +91,8 @@ class AuroraModel:
         for i in range(4):
             CONST = const[i]
             for ij in range(6):
-                k = ij + 1 # this takes care of the (cos 1, cos 2 , cos 3 ... or sin 1, sin 2 and sin 3... (and multiply the angle))
+                # this takes care of the (cos 1, cos 2 , cos 3 ... or sin 1, sin 2 and sin 3... (and multiply the angle))
+                k = ij + 1
                 CONST = (
                     CONST
                     + ind_cos[ij, i] * np.cos(k * self.ang)
@@ -212,7 +213,7 @@ class AuroraModel:
         kpm1, kpm2 = self.kpm(kp)
         f1 = (kpm2 - kp) / (kpm2 - kpm1)
         f2 = (kp - kpm1) / (kpm2 - kpm1)
-        flux = np.full((len(self.MLT), len(self.Mlat)), np.nan)
+        # flux = np.full((len(self.MLT), len(self.Mlat)), np.nan)
         flux = []
         # Obtain lower and upper coefficients using flux_coeff() method
         L, U = self.flux_coeff(kp)
@@ -287,12 +288,13 @@ class AuroraModel:
             top_indices.append(top_ind)
             bottom_indices.append(bottom_ind)
         return top_indices, bottom_indices
-    
+
     def calculate_conductance(self, kp):
-        # calculates the conductance (pedersen and hall) for a given Kp index using Robinson 1987 paper 
+        # calculates the conductance (pedersen and hall) for a given Kp index using Robinson 1987 paper
         # https://agupubs.onlinelibrary.wiley.com/doi/10.1029/JA092iA03p02565
-        pedersen_conductance = ((40* self.Emean(kp))/(16+ self.Emean(kp)**2))*(self.Eflux(kp)**(1/2))
-        hall_conductance = (0.45* (self.Emean(kp)**0.85))*pedersen_conductance
+        pedersen_conductance = (
+            (40 * self.Emean(kp))/(16 + self.Emean(kp)**2))*(self.Eflux(kp)**(1/2))
+        hall_conductance = (0.45 * (self.Emean(kp)**0.85))*pedersen_conductance
         return pedersen_conductance, hall_conductance
 
     def plot_kp(self, kp, savefig=False, cmap_upper=6):
@@ -316,8 +318,8 @@ class AuroraModel:
         emean = self.Emean(kp)
         eflux = self.Eflux(kp)
         top_indices, bottom_indices = self.find_boundary_indices(eflux.T, 0.25)
-        Lat = np.arange(40, 90.5, 0.15)  # for Southern hemisphere -90:0.5:-30
-        Lon = np.arange(0, 360, 0.15)
+        Lat = self.Mlat  # for Southern hemisphere -90:0.5:-30
+        Lon = np.linspace(0, 360, self.MLT.shape[0])
         xlat, ylon = np.meshgrid(Lat, Lon)
         ###
         colors = [

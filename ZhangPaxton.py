@@ -33,10 +33,8 @@ def ZhangPaxton(mlat,mlt, kp):
     kpm1, kpm2 = kpm(kp)
     f1, f2 = (kpm2 - kp) / (kpm2 - kpm1), (kp - kpm1) / (kpm2 - kpm1)
     # L, U = flux_coeff(kp, ang)
-    Eom1_L = (L[0] * np.exp((chi - L[1]) / L[2])) / \
-        ((1 + np.exp((chi - L[1]) / L[3]))**2)
-    Eom1_U = (U[0] * np.exp((chi - U[1]) / U[2])) / \
-        ((1 + np.exp((chi - U[1]) / U[3]))**2)
+    Eom1_L = (L[0] * np.exp((chi - L[1]) / L[2])) / ((1 + np.exp((chi - L[1]) / L[3]))**2)
+    Eom1_U = (U[0] * np.exp((chi - U[1]) / U[2])) / ((1 + np.exp((chi - U[1]) / U[3]))**2)
     eflux = f1 * Eom1_L + f2 * Eom1_U
     ## Emean calculation
     emean_coeff_L, emean_coeff_U = get_coeff(kp, 'eflux')

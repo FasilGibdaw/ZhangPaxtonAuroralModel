@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-# eflux_coeff = pd.read_csv('./eflux_coeff/eflux_coeff.txt', sep='\t')
-# emean_coeff = pd.read_csv('./eflux_coeff/emean_coeff.txt', sep='\t')
+
 def ZhangPaxton(mlat,mlt, kp):
     """ Calculate electron flux and mean energy using Zhang-Paxton model.
     Based on the paper: 
@@ -81,9 +80,9 @@ def hemispheric_power(kp):
 def get_coeff(kp, input_file = 'emean'):
     KK = [1.5, 3, 4.5, 6, 8, 10]
     if input_file == 'emean':
-        coeff = pd.read_csv('./emean_coeff/emean_coeff.txt', sep='\t')
+        coeff = pd.read_csv('./data/zhang_paxton_emean_coeff.txt', sep='\t')
     elif input_file == 'eflux':
-        coeff = pd.read_csv('./eflux_coeff/eflux_coeff.txt', sep='\t')
+        coeff = pd.read_csv('./data/zhang_paxton_eflux_coeff.txt', sep='\t')
     else:
         print('Epistein coefficients not found')
     for i, k in enumerate(KK):
@@ -104,4 +103,4 @@ def ZhangPaxton_conductance(mlat, mlt, kp):
         (40 * emean)/(16 + emean**2))*(eflux**(1/2))
     hall_conductance = (0.45 * (emean**0.85)
                         )*pedersen_conductance
-    return pedersen_conductance, hall_conductance
+    return hall_conductance, pedersen_conductance

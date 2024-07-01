@@ -96,7 +96,7 @@ def get_coeff(kp, input_file = 'emean'):
             coeff_U = coeff[coeff.Kp == 'K1']
     return coeff_L, coeff_U
 
-def calculate_conductance(mlat, mlt, kp):
+def ZhangPaxton_conductance(mlat, mlt, kp):
     # calculates the conductance (pedersen and hall) for a given Kp index using Robinson 1987 paper
     # https://agupubs.onlinelibrary.wiley.com/doi/10.1029/JA092iA03p02565
     eflux, emean = ZhangPaxton(mlat, mlt, kp)

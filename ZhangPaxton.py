@@ -38,7 +38,7 @@ def ZhangPaxton(mlat,mlt, kp):
     Eom1_U = (U[0] * np.exp((chi - U[1]) / U[2])) / ((1 + np.exp((chi - U[1]) / U[3]))**2)
     eflux = f1 * Eom1_L + f2 * Eom1_U
     ## Emean calculation
-    emean_coeff_L, emean_coeff_U = get_coeff(kp, 'eflux')
+    emean_coeff_L, emean_coeff_U = get_coeff(kp, 'emean')
     const = emean_coeff_L.iloc[0].values[2:]
     ind_cos = emean_coeff_L.iloc[1:7].values[:,2:]
     ind_sin = emean_coeff_L.iloc[7:].values[:,2:]
